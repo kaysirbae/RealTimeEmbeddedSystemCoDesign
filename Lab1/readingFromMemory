@@ -1,0 +1,31 @@
+/* DriverLib Includes */
+#include <ti/devices/msp432p4xx/driverlib/driverlib.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+int main(void)
+{
+    const char* descriptors[17] = {"TLV checksum", "Device Info Tag", "Device Info Length", "Device ID", "Hardware Revision",
+                                   "Boot-Code Revision", "ROM Driver Library Revision", "Die Record Tag", "Die Record Length",
+                                   "Die X Position", "Die Y Position", "Wafer ID", "Lot ID", "Reserved ", "Reserved ", "Reserved ",
+                                   "Test Results"};
+
+    /* Stop Watchdog */
+    MAP_WDT_A_holdTimer();
+
+    //create and initialize table/increment variable for loop
+    uint32_t *table;
+    table = (uint32_t*) 0x00201000;
+    int i = 0;
+    //create array for values
+    uint32_t d0[17];
+    for(i = 0; i < 17; i++)
+    {
+        d0[i] = table[i];
+        printf("\n Description: %-28s", descriptors[i]);
+        printf(" | Address(Hex): %-15x", &table[i]);
+        printf(" | Value: %-15x", d0[i]);
+    }
+}
