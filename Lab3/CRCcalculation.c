@@ -6,7 +6,7 @@
 #define CRC32_POLY  0xEDB88320
 #define CRC32_INIT  0xFFFFFFFF
 
-static uint8_t Data[10240] = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39};
+static const uint8_t Data[9] = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39};
 static uint32_t calculateCRC32(uint8_t* data, uint32_t length);
 static uint32_t compute_simple_checksum(uint8_t* data, uint32_t length);
 
@@ -19,49 +19,20 @@ int main(void)
 
     uint32_t i;
 
-    MAP_Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_FREE_RUN_MODE);
-    MAP_Timer32_startTimer(TIMER32_0_BASE, 0);
-
-    float freq = MAP_CS_getMCLK();
-    float time = 1/freq * 1000;
-
-    uint32_t hardware_t0 = MAP_Timer32_getValue(TIMER32_0_BASE);
-
     MAP_CRC32_setSeed(CRC32_INIT, CRC32_MODE);
 
-    MAP_CRC32_setSeed(CRC32_INIT, CRC32_MODE);
-
-    for(i = 0; i < 10240; i++){
-        Data[i] = i;
+    for(i = 0; i < 9; i++){
         MAP_CRC32_set8BitData(Data[i], CRC32_MODE);
     }
 
     hardwareCRC = MAP_CRC32_getResultReversed(CRC32_MODE) ^ 0xFFFFFFFF;
-    uint32_t hardware_t1 = MAP_Timer32_getValue(TIMER32_0_BASE);
-    uint32_t hardware_deltaT = (hardware_t0 - hardware_t1) * time;
+    softwareCRC = calculateCRC32((uint8_t*) Data, 9);
 
-    uint32_t software_t0 = MAP_Timer32_getValue(TIMER32_0_BASE);
-    softwareCRC = calculateCRC32((uint8_t*) Data, 10240);
-    uint32_t software_t1 = MAP_Timer32_getValue(TIMER32_0_BASE);
-    uint32_t software_deltaT = (software_t0 - software_t1) * time;
+    uint32_t calculatedCRC = compute_simple_checksum((uint8_t*) Data, 9);
 
-    uint32_t t0 = MAP_Timer32_getValue(TIMER32_0_BASE);
-    uint32_t calculated_CRC = compute_simple_checksum((uint8_t*) Data, 10240);
-    uint32_t t1 = MAP_Timer32_getValue(TIMER32_0_BASE);
-    uint32_t deltaT = (t0 - t1) * time;
-
-    float speedTime = hardware_deltaT / software_deltaT;
-
-    printf("\n CRC: %u\n", calculated_CRC);
-    printf("CRC Time: %ums\n", deltaT);
-
-    printf("Hardware CRC: %u\n", hardwareCRC);
-    printf("Hardware Time: %ums\n", hardware_deltaT);
+    printf("\nLab CRC: %u\n", calculatedCRC);
+    printf("HardwareCRC: %u\n", hardwareCRC);
     printf("Software CRC: %u\n", softwareCRC);
-    printf("Software Time: %ums\n", software_deltaT);
-
-    printf("Speed Up Time: %u\n", speedTime);
-
     __no_operation();
 }
 
