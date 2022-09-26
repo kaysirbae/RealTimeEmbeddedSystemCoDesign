@@ -5,7 +5,9 @@
 #define CRC32_POLY 0xEDB88320 
 #define CRC32_INIT 0xFFFFFFFF 
 static uint8_t Data[10240]; 
-static uint32_t calculateCRC32(uint8_t * data, uint32_t length); static uint32_t compute_simple_checksum(uint8_t * data, uint32_t length); volatile uint32_t Hardware_CRC32, Software_CRC32, Manual_CRC32; 
+static uint32_t calculateCRC32(uint8_t * data, uint32_t length); 
+static uint32_t compute_simple_checksum(uint8_t * data, uint32_t length); 
+volatile uint32_t Hardware_CRC32, Software_CRC32, Manual_CRC32; 
 int main(void) 
 { 
  /* Stop WDT */ 
